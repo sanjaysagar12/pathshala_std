@@ -225,13 +225,4 @@ class SubjectDetailScreen extends StatelessWidget {
       ),
     );
   }
-
-  void _showComingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature feature coming soon!'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 }
