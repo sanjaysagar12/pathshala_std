@@ -112,10 +112,33 @@ class _LearningScreenState extends State<LearningScreen> {
         currentTopicIndex++;
       });
     } else if (currentLessonIndex < subjectLessons.length - 1) {
-      setState(() {
-        currentLessonIndex++;
-        currentTopicIndex = 0;
+      // Navigate to test before going to next lesson
+      Navigator.pushNamed(
+        context,
+        '/test',
+        arguments: {
+          'subjectName': widget.subjectName,
+          'subjectColor': widget.subjectColor,
+          'lessonTitle': subjectLessons[currentLessonIndex]['lessonTitle'],
+        },
+      ).then((_) {
+        // After test, move to next lesson
+        setState(() {
+          currentLessonIndex++;
+          currentTopicIndex = 0;
+        });
       });
+    } else {
+      // Last topic of last lesson - go to final test
+      Navigator.pushNamed(
+        context,
+        '/test',
+        arguments: {
+          'subjectName': widget.subjectName,
+          'subjectColor': widget.subjectColor,
+          'lessonTitle': 'Final Test - ${widget.subjectName}',
+        },
+      );
     }
   }
 
@@ -381,9 +404,15 @@ class _LearningScreenState extends State<LearningScreen> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: currentGlobalIndex < totalTopics ? _nextTopic : null,
+                  onPressed: currentGlobalIndex <= totalTopics ? _nextTopic : null,
                   icon: const Icon(Icons.arrow_forward),
-                  label: Text(currentTopicIndex < currentTopics.length - 1 ? 'Next Topic' : 'Next Lesson'),
+                  label: Text(
+                    currentTopicIndex < currentTopics.length - 1 
+                        ? 'Next Topic' 
+                        : currentLessonIndex < subjectLessons.length - 1
+                            ? 'Take Test'
+                            : 'Final Test'
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: widget.subjectColor,
                     foregroundColor: Colors.white,
