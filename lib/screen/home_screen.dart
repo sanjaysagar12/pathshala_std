@@ -66,11 +66,14 @@ class HomeScreen extends StatelessWidget {
                     elevation: 4,
                     child: InkWell(
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Opening ${subject['name']}...'),
-                            duration: const Duration(seconds: 1),
-                          ),
+                        Navigator.pushNamed(
+                          context,
+                          '/subject-detail',
+                          arguments: {
+                            'name': subject['name'],
+                            'icon': subject['icon'],
+                            'color': subject['color'],
+                          },
                         );
                       },
                       borderRadius: BorderRadius.circular(12),

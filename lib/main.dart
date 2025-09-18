@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screen/splash_screen.dart';
 import 'screen/login_screen.dart';
 import 'screen/home_screen.dart';
+import 'screen/subject_detail_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,6 +24,19 @@ class MyApp extends StatelessWidget {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/subject-detail') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => SubjectDetailScreen(
+              subjectName: args['name'],
+              subjectIcon: args['icon'],
+              subjectColor: args['color'],
+            ),
+          );
+        }
+        return null;
       },
     );
   }
