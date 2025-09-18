@@ -86,7 +86,14 @@ class SubjectDetailScreen extends StatelessWidget {
                     'Read comprehensive study materials',
                     Icons.note_alt,
                     Colors.blue,
-                    () => _showComingSoon(context, 'Notes'),
+                    () => Navigator.pushNamed(
+                      context,
+                      '/notes',
+                      arguments: {
+                        'subjectName': subjectName,
+                        'subjectColor': subjectColor,
+                      },
+                    ),
                   ),
                   _buildLearningCard(
                     context,

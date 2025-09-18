@@ -3,6 +3,7 @@ import 'screen/splash_screen.dart';
 import 'screen/login_screen.dart';
 import 'screen/home_screen.dart';
 import 'screen/subject_detail_screen.dart';
+import 'screen/notes_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,6 +34,15 @@ class MyApp extends StatelessWidget {
               subjectName: args['name'],
               subjectIcon: args['icon'],
               subjectColor: args['color'],
+            ),
+          );
+        }
+        if (settings.name == '/notes') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => NotesScreen(
+              subjectName: args['subjectName'],
+              subjectColor: args['subjectColor'],
             ),
           );
         }
