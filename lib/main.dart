@@ -6,6 +6,7 @@ import 'screen/subject_detail_screen.dart';
 import 'screen/notes_screen.dart';
 import 'screen/learning_screen.dart';
 import 'screen/test_screen.dart';
+import 'screen/quiz_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -64,6 +65,15 @@ class MyApp extends StatelessWidget {
               subjectName: args['subjectName'],
               subjectColor: args['subjectColor'],
               lessonTitle: args['lessonTitle'],
+            ),
+          );
+        }
+        if (settings.name == '/quiz') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => QuizScreen(
+              subjectName: args['subjectName'],
+              subjectColor: args['subjectColor'],
             ),
           );
         }

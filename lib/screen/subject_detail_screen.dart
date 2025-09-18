@@ -101,7 +101,14 @@ class SubjectDetailScreen extends StatelessWidget {
                     'Test your knowledge with AI-powered questions',
                     Icons.quiz,
                     Colors.orange,
-                    () => _showComingSoon(context, 'AI Quiz'),
+                    () => Navigator.pushNamed(
+                      context,
+                      '/quiz',
+                      arguments: {
+                        'subjectName': subjectName,
+                        'subjectColor': subjectColor,
+                      },
+                    ),
                   ),
                   _buildLearningCard(
                     context,
