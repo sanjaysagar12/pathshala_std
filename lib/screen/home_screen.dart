@@ -1,18 +1,8 @@
 import 'package:flutter/material.dart';
+import '../data/subjects_data.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  final List<Map<String, dynamic>> subjects = const [
-    {'name': 'Mathematics', 'icon': Icons.calculate, 'color': Colors.blue},
-    {'name': 'Science', 'icon': Icons.science, 'color': Colors.green},
-    {'name': 'English', 'icon': Icons.book, 'color': Colors.orange},
-    {'name': 'History', 'icon': Icons.history_edu, 'color': Colors.brown},
-    {'name': 'Geography', 'icon': Icons.public, 'color': Colors.teal},
-    {'name': 'Physics', 'icon': Icons.psychology, 'color': Colors.purple},
-    {'name': 'Chemistry', 'icon': Icons.biotech, 'color': Colors.red},
-    {'name': 'Biology', 'icon': Icons.local_florist, 'color': Colors.lightGreen},
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -59,9 +49,9 @@ class HomeScreen extends StatelessWidget {
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                 ),
-                itemCount: subjects.length,
+                itemCount: SubjectsData.subjects.length,
                 itemBuilder: (context, index) {
-                  final subject = subjects[index];
+                  final subject = SubjectsData.subjects[index];
                   return Card(
                     elevation: 4,
                     child: InkWell(
