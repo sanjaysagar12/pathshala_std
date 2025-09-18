@@ -109,7 +109,14 @@ class SubjectDetailScreen extends StatelessWidget {
                     'Begin your interactive learning journey',
                     Icons.play_circle_filled,
                     Colors.green,
-                    () => _showComingSoon(context, 'Start Learning'),
+                    () => Navigator.pushNamed(
+                      context,
+                      '/learning',
+                      arguments: {
+                        'subjectName': subjectName,
+                        'subjectColor': subjectColor,
+                      },
+                    ),
                   ),
                 ],
               ),
