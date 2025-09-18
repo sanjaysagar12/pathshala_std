@@ -21,6 +21,16 @@ class _AIChatComponentState extends State<AIChatComponent> {
   final List<Map<String, String>> _chatMessages = [];
   final ScrollController _scrollController = ScrollController();
 
+  @override
+  void initState() {
+    super.initState();
+    // Add welcome message
+    _chatMessages.add({
+      'sender': 'ai',
+      'message': 'Hi! I\'m here to help you with ${widget.subjectName}${widget.currentTopic != null ? ' - ${widget.currentTopic}' : ''}. Ask me anything!',
+    });
+  }
+
   void _sendMessage() {
     if (_chatController.text.trim().isNotEmpty) {
       setState(() {
