@@ -112,6 +112,21 @@ class SubjectDetailScreen extends StatelessWidget {
                   ),
                   _buildLearningCard(
                     context,
+                    'AI Guide',
+                    'Get personalized help from your AI tutor',
+                    Icons.psychology,
+                    Colors.purple,
+                    () => Navigator.pushNamed(
+                      context,
+                      '/ai-guide',
+                      arguments: {
+                        'subjectName': subjectName,
+                        'subjectColor': subjectColor,
+                      },
+                    ),
+                  ),
+                  _buildLearningCard(
+                    context,
                     'Start Learning',
                     'Begin your interactive learning journey',
                     Icons.play_circle_filled,

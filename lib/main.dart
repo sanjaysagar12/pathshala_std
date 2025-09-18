@@ -7,6 +7,7 @@ import 'screen/notes_screen.dart';
 import 'screen/learning_screen.dart';
 import 'screen/test_screen.dart';
 import 'screen/quiz_screen.dart';
+import 'screen/ai_guide_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -72,6 +73,15 @@ class MyApp extends StatelessWidget {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => QuizScreen(
+              subjectName: args['subjectName'],
+              subjectColor: args['subjectColor'],
+            ),
+          );
+        }
+        if (settings.name == '/ai-guide') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => AIGuideScreen(
               subjectName: args['subjectName'],
               subjectColor: args['subjectColor'],
             ),
