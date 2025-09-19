@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import '../data/subjects_data.dart';
+import '../components/subject_card.dart';
+import '../theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final isTablet = MediaQuery.of(context).size.width > 600;
+    final subjects = SubjectsData.subjects;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pathshala - Subjects'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text('Pathshala', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.primary,
+        elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -17,6 +25,7 @@ class HomeScreen extends StatelessWidget {
               Navigator.pushReplacementNamed(context, '/login');
             },
             icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
           ),
         ],
       ),
@@ -25,86 +34,72 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Welcome to Pathshala!',
-              style: TextStyle(
+              style: GoogleFonts.inter(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
+                color: colorScheme.primary,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Choose a subject to start learning',
-              style: TextStyle(
+              style: GoogleFonts.inter(
                 fontSize: 16,
-                color: Colors.grey,
+                color: colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 1.2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: SubjectsData.subjects.length,
-                itemBuilder: (context, index) {
-                  final subject = SubjectsData.subjects[index];
-                  return Card(
-                    elevation: 4,
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/subject-detail',
-                          arguments: {
-                            'name': subject['name'],
-                            'icon': subject['icon'],
-                            'color': subject['color'],
+              child: subjects.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.emoji_emotions, size: 64, color: colorScheme.primary.withOpacity(0.3)),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No subjects found!',
+                            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: colorScheme.primary),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Add a subject to get started.\nLearning is more fun with friends! 🎉',
+                            style: GoogleFonts.inter(fontSize: 14, color: colorScheme.onSurface.withOpacity(0.7)),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    )
+                  : GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: isTablet ? 3 : 2,
+                        childAspectRatio: 1.2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: subjects.length,
+                      itemBuilder: (context, index) {
+                        final subject = subjects[index];
+                        return SubjectCard(
+                          name: subject['name'],
+                          icon: subject['icon'],
+                          color: subject['color'],
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/subject-detail',
+                              arguments: {
+                                'name': subject['name'],
+                                'icon': subject['icon'],
+                                'color': subject['color'],
+                              },
+                            );
                           },
                         );
                       },
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              subject['color'].withOpacity(0.1),
-                              subject['color'].withOpacity(0.2),
-                            ],
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              subject['icon'],
-                              size: 48,
-                              color: subject['color'],
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              subject['name'],
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: subject['color'],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),

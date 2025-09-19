@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../components/ai_chat_component.dart';
 import '../data/lessons_data.dart';
+import '../theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LearningScreen extends StatefulWidget {
   final String subjectName;
@@ -235,7 +237,12 @@ class _LearningScreenState extends State<LearningScreen> {
     final totalTopics = subjectLessons.fold<int>(0, (sum, lesson) => sum + (lesson['topics'] as List).length);
     final currentGlobalIndex = subjectLessons.take(currentLessonIndex)
         .fold<int>(0, (sum, lesson) => sum + (lesson['topics'] as List).length) + currentTopicIndex + 1;
-    
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Gradient progressGradient = LinearGradient(
+      colors: [widget.subjectColor, widget.subjectColor.withOpacity(0.7)],
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+    );
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -246,15 +253,22 @@ class _LearningScreenState extends State<LearningScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: widget.subjectColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: colorScheme.surface.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.subjectColor.withOpacity(0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   currentLesson['lessonTitle'],
-                  style: TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: widget.subjectColor.withOpacity(0.8),
@@ -263,7 +277,7 @@ class _LearningScreenState extends State<LearningScreen> {
                 const SizedBox(height: 4),
                 Text(
                   currentTopic['title']!,
-                  style: TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: widget.subjectColor,
@@ -272,41 +286,90 @@ class _LearningScreenState extends State<LearningScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Progress: $currentGlobalIndex/$totalTopics topics',
-                  style: TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: colorScheme.onSurface.withOpacity(0.7),
                   ),
                 ),
                 const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: currentGlobalIndex / totalTopics,
-                  backgroundColor: Colors.grey[300],
-                  valueColor: AlwaysStoppedAnimation<Color>(widget.subjectColor),
+                // Animated gradient progress bar
+                TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0, end: currentGlobalIndex / totalTopics),
+                  duration: const Duration(milliseconds: 800),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, child) {
+                    return Stack(
+                      children: [
+                        Container(
+                          height: 10,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: colorScheme.surface.withOpacity(0.3),
+                          ),
+                        ),
+                        Container(
+                          height: 10,
+                          width: MediaQuery.of(context).size.width * value * 0.7,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            gradient: progressGradient,
+                            boxShadow: [
+                              BoxShadow(
+                                color: widget.subjectColor.withOpacity(0.18),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
           ),
           const SizedBox(height: 20),
-          
           // Content
           Expanded(
-            child: SingleChildScrollView(
-              child: Card(
-                elevation: 3,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                    currentTopic['content']!,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      height: 1.6,
+            child: subjectLessons.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.menu_book, size: 64, color: colorScheme.primary.withOpacity(0.3)),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No lessons found!',
+                          style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: colorScheme.primary),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Check back soon for more content.\nKeep your learning streak going! 🔥',
+                          style: GoogleFonts.inter(fontSize: 14, color: colorScheme.onSurface.withOpacity(0.7)),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  )
+                : SingleChildScrollView(
+                    child: Card(
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text(
+                          currentTopic['content']!,
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            height: 1.6,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
           ),
-          
           // Navigation Buttons
           const SizedBox(height: 16),
           Row(
@@ -315,11 +378,12 @@ class _LearningScreenState extends State<LearningScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _changeTopic,
                   icon: const Icon(Icons.list),
-                  label: const Text('Change Topic'),
+                  label: Text('Change Topic', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: studentOrange,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
               ),
@@ -333,12 +397,14 @@ class _LearningScreenState extends State<LearningScreen> {
                         ? 'Next Topic' 
                         : currentLessonIndex < subjectLessons.length - 1
                             ? 'Take Test'
-                            : 'Final Test'
+                            : 'Final Test',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: widget.subjectColor,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
               ),

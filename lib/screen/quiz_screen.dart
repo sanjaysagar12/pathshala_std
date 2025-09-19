@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/quiz_data.dart';
+import '../theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class QuizScreen extends StatefulWidget {
   final String subjectName;
@@ -85,12 +87,19 @@ class _QuizScreenState extends State<QuizScreen> {
 
     final currentQuestion = quizQuestions[currentQuestionIndex];
     final hasAnswer = selectedAnswers[currentQuestionIndex] != null;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Gradient progressGradient = LinearGradient(
+      colors: [widget.subjectColor, widget.subjectColor.withOpacity(0.7)],
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+    );
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.subjectName} - Quiz'),
-        backgroundColor: widget.subjectColor.withOpacity(0.1),
+        title: Text('${widget.subjectName} - Quiz', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        backgroundColor: colorScheme.surface,
         foregroundColor: widget.subjectColor,
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -100,17 +109,24 @@ class _QuizScreenState extends State<QuizScreen> {
             // Progress Header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: widget.subjectColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
+                color: colorScheme.surface.withOpacity(0.8),
+                boxShadow: [
+                  BoxShadow(
+                    color: widget.subjectColor.withOpacity(0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'AI-Powered Quiz',
-                    style: TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: widget.subjectColor,
@@ -119,16 +135,44 @@ class _QuizScreenState extends State<QuizScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'Question ${currentQuestionIndex + 1} of ${quizQuestions.length}',
-                    style: TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: colorScheme.onSurface.withOpacity(0.7),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: (currentQuestionIndex + 1) / quizQuestions.length,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(widget.subjectColor),
+                  TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: (currentQuestionIndex + 1) / quizQuestions.length),
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, child) {
+                      return Stack(
+                        children: [
+                          Container(
+                            height: 10,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: colorScheme.surface.withOpacity(0.3),
+                            ),
+                          ),
+                          Container(
+                            height: 10,
+                            width: MediaQuery.of(context).size.width * value * 0.7,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              gradient: progressGradient,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: widget.subjectColor.withOpacity(0.18),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -142,15 +186,17 @@ class _QuizScreenState extends State<QuizScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Card(
-                      elevation: 3,
+                      elevation: 6,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       child: Padding(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(24),
                         child: Text(
                           currentQuestion['question'],
-                          style: const TextStyle(
+                          style: GoogleFonts.inter(
                             fontSize: 18,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                             height: 1.4,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -165,18 +211,19 @@ class _QuizScreenState extends State<QuizScreen> {
                         final isSelected = selectedAnswers[currentQuestionIndex] == index;
 
                         return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
+                          margin: const EdgeInsets.only(bottom: 14),
                           child: Card(
-                            elevation: isSelected ? 4 : 2,
+                            elevation: isSelected ? 6 : 2,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             child: InkWell(
                               onTap: () => _selectAnswer(index),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(16),
                               child: Container(
-                                padding: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(18),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(16),
                                   color: isSelected 
-                                      ? widget.subjectColor.withOpacity(0.1)
+                                      ? widget.subjectColor.withOpacity(0.13)
                                       : Colors.transparent,
                                   border: isSelected 
                                       ? Border.all(color: widget.subjectColor, width: 2)
@@ -185,33 +232,33 @@ class _QuizScreenState extends State<QuizScreen> {
                                 child: Row(
                                   children: [
                                     Container(
-                                      width: 24,
-                                      height: 24,
+                                      width: 28,
+                                      height: 28,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: isSelected 
                                             ? widget.subjectColor 
-                                            : Colors.grey[300],
+                                            : colorScheme.surface.withOpacity(0.5),
                                       ),
                                       child: Center(
                                         child: Text(
                                           String.fromCharCode(65 + index),
-                                          style: TextStyle(
-                                            color: isSelected ? Colors.white : Colors.grey[600],
+                                          style: GoogleFonts.inter(
+                                            color: isSelected ? Colors.white : colorScheme.onSurface.withOpacity(0.7),
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                                            fontSize: 15,
                                           ),
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 12),
+                                    const SizedBox(width: 16),
                                     Expanded(
                                       child: Text(
                                         option,
-                                        style: TextStyle(
+                                        style: GoogleFonts.inter(
                                           fontSize: 16,
-                                          color: isSelected ? widget.subjectColor : Colors.black87,
-                                          fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                                          color: isSelected ? widget.subjectColor : colorScheme.onSurface,
+                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                                         ),
                                       ),
                                     ),
@@ -240,8 +287,9 @@ class _QuizScreenState extends State<QuizScreen> {
                         foregroundColor: widget.subjectColor,
                         side: BorderSide(color: widget.subjectColor),
                         padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Previous'),
+                      child: Text('Previous', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                     ),
                   ),
                 if (currentQuestionIndex > 0) const SizedBox(width: 16),
@@ -252,11 +300,13 @@ class _QuizScreenState extends State<QuizScreen> {
                       backgroundColor: widget.subjectColor,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(
                       currentQuestionIndex < quizQuestions.length - 1 
                           ? 'Next' 
                           : 'Finish Quiz',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),

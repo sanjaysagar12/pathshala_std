@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/test_data.dart';
+import '../theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TestScreen extends StatefulWidget {
   final String subjectName;
@@ -72,12 +74,19 @@ class _TestScreenState extends State<TestScreen> {
 
     final currentQuestion = testQuestions[currentQuestionIndex];
     final hasSelectedAnswer = selectedAnswers.length > currentQuestionIndex;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Gradient progressGradient = LinearGradient(
+      colors: [widget.subjectColor, widget.subjectColor.withOpacity(0.7)],
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+    );
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.subjectName} - Test'),
-        backgroundColor: widget.subjectColor.withOpacity(0.1),
+        title: Text('${widget.subjectName} - Test', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        backgroundColor: colorScheme.surface,
         foregroundColor: widget.subjectColor,
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -87,43 +96,79 @@ class _TestScreenState extends State<TestScreen> {
             // Test Header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: widget.subjectColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
+                color: colorScheme.surface.withOpacity(0.8),
+                boxShadow: [
+                  BoxShadow(
+                    color: widget.subjectColor.withOpacity(0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     widget.lessonTitle,
-                    style: TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: widget.subjectColor.withOpacity(0.8),
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
+                  Text(
                     'Lesson Test',
-                    style: TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
+                      color: widget.subjectColor,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Question ${currentQuestionIndex + 1} of ${testQuestions.length}',
-                    style: TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: colorScheme.onSurface.withOpacity(0.7),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: (currentQuestionIndex + 1) / testQuestions.length,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(widget.subjectColor),
+                  TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: (currentQuestionIndex + 1) / testQuestions.length),
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, child) {
+                      return Stack(
+                        children: [
+                          Container(
+                            height: 10,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: colorScheme.surface.withOpacity(0.3),
+                            ),
+                          ),
+                          Container(
+                            height: 10,
+                            width: MediaQuery.of(context).size.width * value * 0.7,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              gradient: progressGradient,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: widget.subjectColor.withOpacity(0.18),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -132,15 +177,17 @@ class _TestScreenState extends State<TestScreen> {
 
             // Question
             Card(
-              elevation: 3,
+              elevation: 6,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 child: Text(
                   currentQuestion['question'],
-                  style: const TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 18,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     height: 1.4,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -157,18 +204,19 @@ class _TestScreenState extends State<TestScreen> {
                       selectedAnswers[currentQuestionIndex] == index;
 
                   return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
+                    margin: const EdgeInsets.only(bottom: 14),
                     child: Card(
-                      elevation: isSelected ? 4 : 2,
+                      elevation: isSelected ? 6 : 2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       child: InkWell(
                         onTap: () => _selectAnswer(index),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                         child: Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                             color: isSelected 
-                                ? widget.subjectColor.withOpacity(0.1)
+                                ? widget.subjectColor.withOpacity(0.13)
                                 : Colors.transparent,
                             border: isSelected 
                                 ? Border.all(color: widget.subjectColor, width: 2)
@@ -177,33 +225,33 @@ class _TestScreenState extends State<TestScreen> {
                           child: Row(
                             children: [
                               Container(
-                                width: 24,
-                                height: 24,
+                                width: 28,
+                                height: 28,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: isSelected 
                                       ? widget.subjectColor 
-                                      : Colors.grey[300],
+                                      : colorScheme.surface.withOpacity(0.5),
                                 ),
                                 child: Center(
                                   child: Text(
                                     String.fromCharCode(65 + index), // A, B, C, D
-                                    style: TextStyle(
-                                      color: isSelected ? Colors.white : Colors.grey[600],
+                                    style: GoogleFonts.inter(
+                                      color: isSelected ? Colors.white : colorScheme.onSurface.withOpacity(0.7),
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                      fontSize: 15,
                                     ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 16),
                               Expanded(
                                 child: Text(
                                   option,
-                                  style: TextStyle(
+                                  style: GoogleFonts.inter(
                                     fontSize: 16,
-                                    color: isSelected ? widget.subjectColor : Colors.black87,
-                                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                                    color: isSelected ? widget.subjectColor : colorScheme.onSurface,
+                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                                   ),
                                 ),
                               ),
@@ -235,7 +283,7 @@ class _TestScreenState extends State<TestScreen> {
                   currentQuestionIndex < testQuestions.length - 1 
                       ? 'Next Question' 
                       : 'Finish Test',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16),
                 ),
               ),
             ),
