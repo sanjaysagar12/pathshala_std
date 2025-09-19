@@ -63,6 +63,9 @@ class SubjectCard extends StatelessWidget {
                         image!,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
+                          // Enhanced error handling with debug info
+                          debugPrint('Failed to load image: $image');
+                          debugPrint('Error: $error');
                           return Container(
                             decoration: BoxDecoration(
                               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -70,8 +73,8 @@ class SubjectCard extends StatelessWidget {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  color.withOpacity(0.2),
-                                  color.withOpacity(0.4),
+                                  color.withOpacity(0.3),
+                                  color.withOpacity(0.5),
                                 ],
                               ),
                             ),
@@ -82,22 +85,44 @@ class SubjectCard extends StatelessWidget {
                                   Icon(
                                     icon,
                                     size: 48,
-                                    color: color,
+                                    color: Colors.white,
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
+                                    name,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
                                     'Image not found',
                                     style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: color,
-                                      fontWeight: FontWeight.w500,
+                                      fontSize: 10,
+                                      color: Colors.white.withOpacity(0.8),
+                                      fontWeight: FontWeight.w400,
                                     ),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ],
                               ),
                             ),
                           );
                         },
+                        // Add frame loading callback for debugging
+                        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                          if (wasSynchronouslyLoaded) return child;
+                          return AnimatedOpacity(
+                            opacity: frame == null ? 0 : 1,
+                            duration: const Duration(milliseconds: 300),
+                            child: child,
+                          );
+                        },
+                        // Add semantic label for accessibility
+                        semanticLabel: '$name subject image',
                       ),
                     )
                   : Container(
@@ -107,16 +132,31 @@ class SubjectCard extends StatelessWidget {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            color.withOpacity(0.2),
-                            color.withOpacity(0.4),
+                            color.withOpacity(0.3),
+                            color.withOpacity(0.5),
                           ],
                         ),
                       ),
                       child: Center(
-                        child: Icon(
-                          icon,
-                          size: 64,
-                          color: color,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              icon,
+                              size: 64,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              name,
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
                       ),
                     ),

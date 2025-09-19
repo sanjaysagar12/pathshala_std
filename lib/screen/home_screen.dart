@@ -3,9 +3,22 @@ import '../data/subjects_data.dart';
 import '../components/subject_card.dart';
 import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../utils/asset_tester.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Test assets when screen loads
+    AssetTester.testAllSubjectAssets();
+  }
 
   @override
   Widget build(BuildContext context) {
