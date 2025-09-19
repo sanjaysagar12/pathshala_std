@@ -147,4 +147,3 @@ class _CustomButtonState extends State<CustomButton> with SingleTickerProviderSt
     );
   }
 }
-}
