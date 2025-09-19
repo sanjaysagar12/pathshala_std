@@ -72,31 +72,33 @@ class HomeScreen extends StatelessWidget {
                         ],
                       ),
                     )
-                  : GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: isTablet ? 3 : 2,
-                        childAspectRatio: 1.2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
+                  : ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 16),
                       itemCount: subjects.length,
                       itemBuilder: (context, index) {
                         final subject = subjects[index];
-                        return SubjectCard(
-                          name: subject['name'],
-                          icon: subject['icon'],
-                          color: subject['color'],
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/subject-detail',
-                              arguments: {
-                                'name': subject['name'],
-                                'icon': subject['icon'],
-                                'color': subject['color'],
-                              },
-                            );
-                          },
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: SubjectCard(
+                            name: subject['name'],
+                            icon: subject['icon'],
+                            color: subject['color'],
+                            image: subject['image'],
+                            progress: subject['progress']?.toDouble() ?? 0.0,
+                            totalLessons: subject['totalLessons'] ?? 0,
+                            completedLessons: subject['completedLessons'] ?? 0,
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/subject-detail',
+                                arguments: {
+                                  'name': subject['name'],
+                                  'icon': subject['icon'],
+                                  'color': subject['color'],
+                                },
+                              );
+                            },
+                          ),
                         );
                       },
                     ),
