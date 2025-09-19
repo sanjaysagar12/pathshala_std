@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AIGuideScreen extends StatefulWidget {
   final String subjectName;
@@ -113,10 +114,23 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text('AI Guide - ${widget.subjectName}'),
-        backgroundColor: widget.subjectColor.withOpacity(0.1),
-        foregroundColor: widget.subjectColor,
+        title: Text(
+          'AI Assistant',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios, size: 20),
+        ),
+        elevation: 0,
+        centerTitle: true,
         actions: [
           IconButton(
             onPressed: () {
@@ -128,57 +142,60 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
                 });
               });
             },
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: Colors.grey[600]),
             tooltip: 'Clear Chat',
           ),
         ],
       ),
       body: Column(
         children: [
-          // AI Guide Header
+          // Enhanced AI Guide Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  widget.subjectColor.withOpacity(0.1),
-                  widget.subjectColor.withOpacity(0.2),
-                ],
-              ),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: widget.subjectColor,
-                    borderRadius: BorderRadius.circular(25),
+                    color: widget.subjectColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
-                    Icons.psychology,
-                    color: Colors.white,
-                    size: 24,
+                  child: Icon(
+                    Icons.smart_toy_outlined,
+                    size: 28,
+                    color: widget.subjectColor,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Your Personal AI Guide',
-                        style: TextStyle(
-                          fontSize: 18,
+                        widget.subjectName,
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: widget.subjectColor,
+                          color: Colors.black87,
                         ),
                       ),
+                      const SizedBox(height: 4),
                       Text(
-                        'Ask me anything about ${widget.subjectName}',
-                        style: TextStyle(
+                        'Your personal AI tutor is ready',
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           color: Colors.grey[600],
                         ),
@@ -189,27 +206,27 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.2),
+                    color: Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 8,
-                        height: 8,
+                        width: 6,
+                        height: 6,
                         decoration: const BoxDecoration(
                           color: Colors.green,
                           shape: BoxShape.circle,
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      const Text(
+                      const SizedBox(width: 6),
+                      Text(
                         'Online',
-                        style: TextStyle(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           color: Colors.green,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -223,7 +240,7 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
@@ -239,16 +256,16 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
                     children: [
                       if (!isUser) ...[
                         Container(
-                          width: 36,
-                          height: 36,
+                          width: 32,
+                          height: 32,
                           decoration: BoxDecoration(
-                            color: widget.subjectColor,
-                            borderRadius: BorderRadius.circular(18),
+                            color: widget.subjectColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Icon(
-                            Icons.psychology,
-                            color: Colors.white,
-                            size: 20,
+                          child: Icon(
+                            Icons.smart_toy_outlined,
+                            color: widget.subjectColor,
+                            size: 18,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -262,7 +279,7 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
                           decoration: BoxDecoration(
                             color: isUser 
                                 ? widget.subjectColor 
-                                : Colors.grey[100],
+                                : Colors.white,
                             borderRadius: BorderRadius.only(
                               topLeft: const Radius.circular(16),
                               topRight: const Radius.circular(16),
@@ -275,18 +292,18 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 4,
+                                color: Colors.black.withOpacity(0.04),
+                                blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
                             ],
                           ),
                           child: Text(
                             message['message']!,
-                            style: TextStyle(
+                            style: GoogleFonts.inter(
                               color: isUser ? Colors.white : Colors.black87,
                               fontSize: 15,
-                              height: 1.4,
+                              height: 1.5,
                             ),
                           ),
                         ),
@@ -294,16 +311,16 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
                       if (isUser) ...[
                         const SizedBox(width: 12),
                         Container(
-                          width: 36,
-                          height: 36,
+                          width: 32,
+                          height: 32,
                           decoration: BoxDecoration(
-                            color: Colors.grey[400],
-                            borderRadius: BorderRadius.circular(18),
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 20,
+                          child: Icon(
+                            Icons.person_outline,
+                            color: Colors.grey[600],
+                            size: 18,
                           ),
                         ),
                       ],
@@ -314,18 +331,15 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
             ),
           ),
           
-          // Message Input
+          // Enhanced Message Input
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border(
-                top: BorderSide(color: Colors.grey[300]!),
-              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
-                  blurRadius: 4,
+                  blurRadius: 10,
                   offset: const Offset(0, -2),
                 ),
               ],
@@ -335,19 +349,28 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(25),
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Colors.grey[200]!,
+                        width: 1,
+                      ),
                     ),
                     child: TextField(
                       controller: _messageController,
-                      decoration: const InputDecoration(
-                        hintText: 'Ask me anything about this subject...',
+                      decoration: InputDecoration(
+                        hintText: 'Ask me anything about ${widget.subjectName}...',
+                        hintStyle: GoogleFonts.inter(
+                          color: Colors.grey[500],
+                          fontSize: 14,
+                        ),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
+                        contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
                         ),
                       ),
+                      style: GoogleFonts.inter(fontSize: 14),
                       onSubmitted: (_) => _sendMessage(),
                       maxLines: null,
                     ),
@@ -355,14 +378,32 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
                 ),
                 const SizedBox(width: 12),
                 Container(
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: widget.subjectColor,
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: widget.subjectColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  child: IconButton(
-                    onPressed: _sendMessage,
-                    icon: const Icon(Icons.send, color: Colors.white),
-                    iconSize: 20,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _sendMessage,
+                      borderRadius: BorderRadius.circular(24),
+                      child: const Center(
+                        child: Icon(
+                          Icons.send_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
