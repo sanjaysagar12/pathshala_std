@@ -79,8 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Curriculum Subjects Section
-                    _buildSectionHeader('Curriculum Subjects', colorScheme),
                     const SizedBox(height: 12),
                     ...curriculumSubjects.map((subject) => _buildSubjectCard(subject)),
                     
@@ -133,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: GoogleFonts.inter(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: studentOrange,
+              color: const Color(0xFFFF8A2B),
             ),
           ),
         ],
