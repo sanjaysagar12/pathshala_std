@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SubjectDetailScreen extends StatelessWidget {
   final String subjectName;
@@ -14,15 +16,18 @@ class SubjectDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final isTablet = MediaQuery.of(context).size.width > 600;
     return Scaffold(
       appBar: AppBar(
-        title: Text(subjectName),
-        backgroundColor: subjectColor.withOpacity(0.1),
+        title: Text(subjectName, style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        backgroundColor: colorScheme.surface,
         foregroundColor: subjectColor,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -42,6 +47,13 @@ class SubjectDetailScreen extends StatelessWidget {
                     subjectColor.withOpacity(0.2),
                   ],
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: subjectColor.withOpacity(0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
@@ -53,7 +65,7 @@ class SubjectDetailScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     subjectName,
-                    style: TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: subjectColor,
@@ -62,9 +74,9 @@ class SubjectDetailScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Explore and learn with interactive content',
-                    style: TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 16,
-                      color: Colors.grey[600],
+                      color: colorScheme.onSurface.withOpacity(0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -75,8 +87,8 @@ class SubjectDetailScreen extends StatelessWidget {
             // Learning Options
             Expanded(
               child: GridView.count(
-                crossAxisCount: 1,
-                childAspectRatio: 3,
+                crossAxisCount: isTablet ? 2 : 1,
+                childAspectRatio: isTablet ? 2.5 : 3,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 children: [
@@ -157,31 +169,33 @@ class SubjectDetailScreen extends StatelessWidget {
     Color color,
     VoidCallback onTap,
   ) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Card(
-      elevation: 4,
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                color.withOpacity(0.1),
-                color.withOpacity(0.2),
+                color.withOpacity(0.13),
+                color.withOpacity(0.22),
               ],
             ),
           ),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(
                   icon,
@@ -189,7 +203,7 @@ class SubjectDetailScreen extends StatelessWidget {
                   color: color,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,7 +211,7 @@ class SubjectDetailScreen extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: color,
@@ -206,9 +220,9 @@ class SubjectDetailScreen extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: TextStyle(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: colorScheme.onSurface.withOpacity(0.7),
                       ),
                     ),
                   ],
