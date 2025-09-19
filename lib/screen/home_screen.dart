@@ -24,10 +24,19 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final isTablet = MediaQuery.of(context).size.width > 600;
-    final subjects = SubjectsData.subjects;
+    final curriculumSubjects = SubjectsData.curriculumSubjects;
+    final additionalSubjects = SubjectsData.additionalSubjects;
+    
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pathshala', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        title: Image.asset(
+          'assets/images/logo.png',
+          height: 40,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Text('Pathshala', style: GoogleFonts.inter(fontWeight: FontWeight.bold));
+          },
+        ),
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.primary,
         elevation: 0,
@@ -64,60 +73,96 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            
             Expanded(
-              child: subjects.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.emoji_emotions, size: 64, color: colorScheme.primary.withOpacity(0.3)),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No subjects found!',
-                            style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: colorScheme.primary),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Add a subject to get started.\nLearning is more fun with friends! 🎉',
-                            style: GoogleFonts.inter(fontSize: 14, color: colorScheme.onSurface.withOpacity(0.7)),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      itemCount: subjects.length,
-                      itemBuilder: (context, index) {
-                        final subject = subjects[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: SubjectCard(
-                            name: subject['name'],
-                            icon: subject['icon'],
-                            color: subject['color'],
-                            image: subject['image'],
-                            progress: subject['progress']?.toDouble() ?? 0.0,
-                            totalLessons: subject['totalLessons'] ?? 0,
-                            completedLessons: subject['completedLessons'] ?? 0,
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/subject-detail',
-                                arguments: {
-                                  'name': subject['name'],
-                                  'icon': subject['icon'],
-                                  'color': subject['color'],
-                                },
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Curriculum Subjects Section
+                    _buildSectionHeader('Curriculum Subjects', colorScheme),
+                    const SizedBox(height: 12),
+                    ...curriculumSubjects.map((subject) => _buildSubjectCard(subject)),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Additional Subjects Section
+                    _buildSectionHeader('Additional Subjects', colorScheme),
+                    const SizedBox(height: 12),
+                    ...additionalSubjects.map((subject) => _buildSubjectCard(subject)),
+                    
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, ColorScheme colorScheme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: studentOrange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: studentOrange.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: studentOrange,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              title.contains('Curriculum') ? Icons.school : Icons.extension,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: studentOrange,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubjectCard(Map<String, dynamic> subject) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: SubjectCard(
+        name: subject['name'],
+        icon: subject['icon'],
+        color: subject['color'],
+        image: subject['image'],
+        progress: subject['progress']?.toDouble() ?? 0.0,
+        totalLessons: subject['totalLessons'] ?? 0,
+        completedLessons: subject['completedLessons'] ?? 0,
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            '/subject-detail',
+            arguments: {
+              'name': subject['name'],
+              'icon': subject['icon'],
+              'color': subject['color'],
+            },
+          );
+        },
       ),
     );
   }

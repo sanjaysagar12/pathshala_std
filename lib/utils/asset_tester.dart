@@ -16,14 +16,20 @@ class AssetTester {
   static Future<void> testAllSubjectAssets() async {
     final List<String> assetPaths = [
       'assets/images/logo.png',
+      // Curriculum Subjects
+      'assets/images/subjects/English.png',
+      'assets/images/subjects/Punjabi.png',
+      'assets/images/subjects/Hindi.png',
       'assets/images/subjects/Mathematics.png',
       'assets/images/subjects/Science.png',
-      'assets/images/subjects/English.png',
       'assets/images/subjects/History.png',
-      'assets/images/subjects/Geography.png',
-      'assets/images/subjects/Physics.png',
-      'assets/images/subjects/Chemistry.png',
-      'assets/images/subjects/Biology.png',
+      // Additional Subjects
+      'assets/images/subjects/Art & Craft.png',
+      'assets/images/subjects/Computer Science.png',
+      'assets/images/subjects/Cooking.png',
+      'assets/images/subjects/Drama.png',
+      'assets/images/subjects/Music.png',
+      'assets/images/subjects/Sports.png',
     ];
 
     debugPrint('🔍 Testing asset availability...');
