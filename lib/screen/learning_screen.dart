@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../components/ai_chat_component.dart';
 import '../data/lessons_data.dart';
-import '../theme.dart';
+// import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LearningScreen extends StatefulWidget {
@@ -380,7 +380,7 @@ class _LearningScreenState extends State<LearningScreen> {
                   icon: const Icon(Icons.list),
                   label: Text('Change Topic', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: studentOrange,
+                    backgroundColor: const Color(0xFFFF8A2B),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

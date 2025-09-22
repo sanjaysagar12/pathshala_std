@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme.dart';
+// import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SubjectCard extends StatelessWidget {
@@ -238,7 +238,7 @@ class SubjectCard extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: onTap,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: studentOrange,
+                          backgroundColor: const Color(0xFFFF8A2B),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),

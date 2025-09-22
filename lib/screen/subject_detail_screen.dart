@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme.dart';
+// import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SubjectDetailScreen extends StatelessWidget {
@@ -16,7 +16,6 @@ class SubjectDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final isTablet = MediaQuery.of(context).size.width > 600;
     
     return Scaffold(

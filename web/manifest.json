@@ -1,6 +1,6 @@
 {
-    "name": "pathshala",
-    "short_name": "pathshala",
+    "name": "pathshala_std",
+    "short_name": "pathshala_std",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

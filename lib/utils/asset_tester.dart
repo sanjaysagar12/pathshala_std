@@ -25,7 +25,7 @@ class AssetTester {
       'assets/images/subjects/History.png',
       // Additional Subjects
       'assets/images/subjects/Art & Craft.png',
-      'assets/images/subjects/Computer Science.png',
+      'assets/images/subjects/ComputerScience.png',
       'assets/images/subjects/Cooking.png',
       'assets/images/subjects/Drama.png',
       'assets/images/subjects/Music.png',

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme.dart';
+// import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ProgressCard extends StatelessWidget {
@@ -26,15 +26,15 @@ class ProgressCard extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Gradient glassGradient = LinearGradient(
       colors: isDark
-          ? [surfaceDark.withOpacity(0.7), Colors.white.withOpacity(0.04)]
-          : [surfaceLight.withOpacity(0.7), Colors.white.withOpacity(0.2)],
+          ? [const Color(0xFF1E293B).withOpacity(0.7), Colors.white.withOpacity(0.04)]
+          : [const Color(0xFFFAFAFA).withOpacity(0.7), Colors.white.withOpacity(0.2)],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     );
     final Gradient progressGradient = LinearGradient(
       colors: isTeacher
-          ? [teacherGreen, teacherGreenDark]
-          : [studentOrange, studentOrangeDark],
+          ? [const Color(0xFF22C55E), const Color(0xFF16A34A)]
+          : [const Color(0xFFFF8A2B), const Color(0xFFFF7A1A)],
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
     );
@@ -57,7 +57,7 @@ class ProgressCard extends StatelessWidget {
             ),
           ],
           border: Border.all(
-            color: isDark ? surfaceDark.withOpacity(0.3) : surfaceLight.withOpacity(0.3),
+            color: isDark ? const Color(0xFF1E293B).withOpacity(0.3) : const Color(0xFFFAFAFA).withOpacity(0.3),
             width: 1.2,
           ),
         ),
@@ -147,7 +147,7 @@ class ProgressCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: isTeacher ? teacherGreen : studentOrange,
+                        color: isTeacher ? const Color(0xFF22C55E) : const Color(0xFFFF8A2B),
                       ),
                     ),
                 ],

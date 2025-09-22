@@ -1,4 +1,4 @@
-name: pathshala
+name: pathshala_std
 description: A learning application
 
 publish_to: 'none'
@@ -18,6 +18,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -27,6 +28,11 @@ flutter:
     - assets/images/
     - assets/images/subjects/
     - assets/images/logo.png
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
 
   # Example of fonts if you have custom fonts
   # fonts:

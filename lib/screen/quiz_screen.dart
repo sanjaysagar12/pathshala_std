@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/quiz_data.dart';
-import '../theme.dart';
+// import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class QuizScreen extends StatefulWidget {

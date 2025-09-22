@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/subjects_data.dart';
 import '../components/subject_card.dart';
-import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../utils/asset_tester.dart';
 
@@ -23,10 +22,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final isTablet = MediaQuery.of(context).size.width > 600;
-    final curriculumSubjects = SubjectsData.curriculumSubjects;
-    final additionalSubjects = SubjectsData.additionalSubjects;
-    
+    const curriculumSubjects = SubjectsData.curriculumSubjects;
+    const additionalSubjects = SubjectsData.additionalSubjects;
+
     return Scaffold(
       appBar: AppBar(
         title: Image.asset(
@@ -101,13 +99,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSectionHeader(String title, ColorScheme colorScheme) {
+    const orange = Color(0xFFFF8A2B);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: studentOrange.withOpacity(0.1),
+        color: orange.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: studentOrange.withOpacity(0.3),
+          color: orange.withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -116,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: studentOrange,
+              color: orange,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -131,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: GoogleFonts.inter(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFFFF8A2B),
+              color: orange,
             ),
           ),
         ],

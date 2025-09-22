@@ -1,4 +1,4 @@
-# pathshala
+# pathshala_std
 
 A new Flutter project.
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/notes_data.dart';
-import '../theme.dart';
+// import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NotesScreen extends StatelessWidget {

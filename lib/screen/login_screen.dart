@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme.dart';
+// import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: studentOrange.withOpacity(0.1),
+                            color: const Color(0xFFFF8A2B).withOpacity(0.1),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -129,12 +129,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   margin: const EdgeInsets.all(8),
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: studentOrange.withOpacity(0.1),
+                                    color: const Color(0xFFFF8A2B).withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Icon(
                                     Icons.person_outline,
-                                    color: studentOrange,
+                                    color: const Color(0xFFFF8A2B),
                                     size: 20,
                                   ),
                                 ),
@@ -174,12 +174,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   margin: const EdgeInsets.all(8),
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: studentOrange.withOpacity(0.1),
+                                    color: const Color(0xFFFF8A2B).withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Icon(
                                     Icons.lock_outline,
-                                    color: studentOrange,
+                                    color: const Color(0xFFFF8A2B),
                                     size: 20,
                                   ),
                                 ),
@@ -221,7 +221,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 style: GoogleFonts.inter(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
-                                  color: studentOrange,
+                                  color: const Color(0xFFFF8A2B),
                                 ),
                               ),
                             ),
@@ -236,13 +236,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _handleLogin,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: studentOrange,
+                                backgroundColor: const Color(0xFFFF8A2B),
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(15),
                                 ),
                                 elevation: 0,
-                                shadowColor: studentOrange.withOpacity(0.3),
+                                shadowColor: const Color(0xFFFF8A2B).withOpacity(0.3),
                               ),
                               child: _isLoading
                                   ? Row(
@@ -303,7 +303,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: studentOrange,
+                              color: const Color(0xFFFF8A2B),
                             ),
                           ),
                         ),

@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "pathshala" "\0"
+            VALUE "FileDescription", "pathshala_std" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "pathshala" "\0"
+            VALUE "InternalName", "pathshala_std" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "pathshala.exe" "\0"
-            VALUE "ProductName", "pathshala" "\0"
+            VALUE "OriginalFilename", "pathshala_std.exe" "\0"
+            VALUE "ProductName", "pathshala_std" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

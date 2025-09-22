@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 
@@ -39,21 +38,20 @@ class _CustomButtonState extends State<CustomButton> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final bool isTeacher = widget.isTeacher;
 
     // Gradient for student/teacher
     final Gradient gradient = LinearGradient(
       colors: isTeacher
-          ? [teacherGreen, teacherGreenDark]
-          : [studentOrange, studentOrangeDark],
+          ? [const Color(0xFF22C55E), const Color(0xFF16A34A)]
+          : [const Color(0xFFFF8A2B), const Color(0xFFFF7A1A)],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     );
 
     final Color fallbackBg = isTeacher
-        ? (isDark ? teacherGreenDark : teacherGreen)
-        : (isDark ? studentOrangeDark : studentOrange);
+  ? (isDark ? const Color(0xFF16A34A) : const Color(0xFF22C55E))
+  : (isDark ? const Color(0xFFFF7A1A) : const Color(0xFFFF8A2B));
 
     Widget buttonChild = widget.isLoading
         ? SizedBox(
@@ -109,7 +107,7 @@ class _CustomButtonState extends State<CustomButton> with SingleTickerProviderSt
             borderRadius: BorderRadius.circular(12),
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
-              splashColor: (isTeacher ? teacherGreen : studentOrange).withOpacity(0.15),
+              splashColor: (isTeacher ? const Color(0xFF22C55E) : const Color(0xFFFF8A2B)).withOpacity(0.15),
               highlightColor: Colors.transparent,
               onTap: widget.isLoading ? null : widget.onPressed,
               child: AnimatedContainer(
@@ -130,7 +128,7 @@ class _CustomButtonState extends State<CustomButton> with SingleTickerProviderSt
                   boxShadow: [
                     if (!widget.isOutlined)
                       BoxShadow(
-                        color: (isTeacher ? teacherGreen : studentOrange).withOpacity(0.18),
+                        color: (isTeacher ? const Color(0xFF22C55E) : const Color(0xFFFF8A2B)).withOpacity(0.18),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
