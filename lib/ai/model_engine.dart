@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gemma/core/chat.dart';
@@ -64,6 +65,13 @@ class AIModelService {
     if (_chat == null) throw StateError('Model not initialized');
 
     // Add the user query as a chunk
+    // Log the full prompt (visible in `flutter logs`) in debug mode before feeding to the model
+    if (kDebugMode) {
+      try {
+        developer.log('AIModelService - prompt:\n$message', name: 'AIModelService');
+      } catch (_) {}
+    }
+
     await _chat!.addQueryChunk(Message(text: message, isUser: true));
 
     final tokenStream = _chat!.generateChatResponseAsync();
@@ -80,6 +88,20 @@ class AIModelService {
 
       yield tokenText;
     }
+  }
+
+  /// Convenience helper that composes a prompt from a template and user input.
+  ///
+  /// The template should include the substring `{input}` which will be replaced
+  /// by the user's input. If `{input}` is not present the userInput will be
+  /// appended to the template separated by a newline.
+  Stream<String> sendMessageWithTemplate(String promptTemplate, String userInput) async* {
+    final composed = promptTemplate.contains('{input}')
+        ? promptTemplate.replaceAll('{input}', userInput)
+        : '$promptTemplate\n$userInput';
+
+    // Delegate to existing sendMessage stream
+    yield* sendMessage(composed);
   }
 
   /// Cleanup model and chat instances.

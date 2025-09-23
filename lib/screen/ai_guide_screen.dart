@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../ai/model_engine.dart';
+import '../data/lessons_data.dart';
 
 class AIGuideScreen extends StatefulWidget {
   final String subjectName;
@@ -114,7 +115,45 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
           });
         });
 
-        final responseStream = _aiService.sendMessage(userMessage);
+        // Build external knowledge from lessons for this subject
+        final lessonsMap = LessonsData.getSubjectLessons(widget.subjectName);
+        final lessonsList = lessonsMap['lessons'] as List<dynamic>? ?? [];
+        final StringBuffer knowledge = StringBuffer();
+        for (final lesson in lessonsList) {
+          final title = lesson['lessonTitle'] ?? '';
+          knowledge.writeln('Lesson: $title');
+          final topics = lesson['topics'] as List<dynamic>? ?? [];
+          for (final topic in topics) {
+            final tTitle = topic['title'] ?? '';
+            final content = topic['content'] ?? '';
+            knowledge.writeln('- $tTitle: $content');
+          }
+          knowledge.writeln();
+        }
+
+        // Truncate knowledge if too large (keep first ~2000 chars)
+        var knowledgeText = knowledge.toString();
+        const int maxKnowledgeLength = 2000;
+        if (knowledgeText.length > maxKnowledgeLength) {
+          knowledgeText = knowledgeText.substring(0, maxKnowledgeLength) + '\n...[truncated]';
+        }
+
+        // Prompt template: inject lessons as context, keep {input} for user query
+        final promptTemplate = '''You are a helpful, accurate tutor. Use the following lessons and topics as the authoritative context when answering. Do NOT make up facts not supported by the lessons. If the answer requires information outside the lessons, say you don't have enough information and give next-best suggestions.
+
+CONTEXT (lessons):
+${knowledgeText}
+
+INSTRUCTIONS:
+- Answer concisely and in simple language suitable for students.
+- Provide step-by-step explanations for problems and short examples when helpful.
+- Highlight important formulas or definitions.
+
+QUESTION:
+{input}
+''';
+
+        final responseStream = _aiService.sendMessageWithTemplate(promptTemplate, userMessage);
         final buffer = StringBuffer();
 
         await for (final tokenText in responseStream) {

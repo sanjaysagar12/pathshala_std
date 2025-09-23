@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../conf.env.dart';
 
 class ModelDownloaderService {
-  static const String modelUrl = 'https://huggingface.co/litert-community/gemma-3-270m-it/resolve/main/gemma3-270m-it-q8.task';
-  static const String modelFilename = 'gemma3-270m-it-q8.task';
+  static const String modelUrl = 'https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/main/Gemma3-1B-IT_multi-prefill-seq_q8_ekv1280.task';
+  static const String modelFilename = 'Gemma3-1B-IT_multi-prefill-seq_q8_ekv1280.task';
   static const String _preferenceKey = 'model_downloaded_$modelFilename';
 
 
