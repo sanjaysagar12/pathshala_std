@@ -3,6 +3,8 @@ import '../components/ai_chat_component.dart';
 import '../data/lessons_data.dart';
 // import '../theme.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../ai/model_engine.dart';
+import 'package:flutter/foundation.dart';
 
 class LearningScreen extends StatefulWidget {
   final String subjectName;
@@ -22,6 +24,13 @@ class _LearningScreenState extends State<LearningScreen> {
   int currentLessonIndex = 0;
   int currentTopicIndex = 0;
   bool showAIChat = false;
+  final AIModelService _aiService = AIModelService();
+  bool _isModelLoading = false;
+  String _modelStatus = '';
+  double? _modelProgress;
+  bool _isGenerating = false;
+  String _aiGeneratedContent = '';
+  String? _lastGeneratedTopicKey;
 
   List<Map<String, dynamic>> get subjectLessons {
     return LessonsData.getSubjectLessons(widget.subjectName)['lessons']!;
@@ -29,6 +38,98 @@ class _LearningScreenState extends State<LearningScreen> {
 
   List<Map<String, String>> get currentTopics => 
       subjectLessons[currentLessonIndex]['topics'] as List<Map<String, String>>;
+
+  @override
+  void initState() {
+    super.initState();
+    // Start generating content for the initial topic
+    _generateContentForCurrentTopic();
+  }
+
+  Future<void> _generateContentForCurrentTopic() async {
+    final currentTopic = currentTopics[currentTopicIndex];
+    final topicKey = '${currentLessonIndex}_$currentTopicIndex';
+    // Avoid regenerating if already generated for this topic
+    if (_lastGeneratedTopicKey == topicKey && _aiGeneratedContent.isNotEmpty) return;
+
+    setState(() {
+      _isGenerating = true;
+      _aiGeneratedContent = '';
+      _lastGeneratedTopicKey = topicKey;
+    });
+
+    try {
+      // Initialize model if needed
+      if (!_aiService.isInitialized) {
+        setState(() {
+          _isModelLoading = true;
+          _modelStatus = 'Preparing AI model...';
+        });
+
+        await _aiService.initialize(
+          onProgress: (p) {
+            setState(() {
+              _modelProgress = p;
+              _modelStatus = 'Downloading model... ${(p * 100).toStringAsFixed(0)}%';
+            });
+          },
+          onStatus: (s) {
+            setState(() {
+              _modelStatus = s;
+            });
+          },
+        );
+
+        setState(() {
+          _isModelLoading = false;
+          _modelProgress = null;
+        });
+      }
+
+      // Build knowledge from lessons (similar to ai_guide_screen)
+      final lessonsMap = LessonsData.getSubjectLessons(widget.subjectName);
+      final lessonsList = lessonsMap['lessons'] as List<dynamic>? ?? [];
+      final StringBuffer knowledge = StringBuffer();
+      for (final lesson in lessonsList) {
+        final title = lesson['lessonTitle'] ?? '';
+        knowledge.writeln('Lesson: $title');
+        final topics = lesson['topics'] as List<dynamic>? ?? [];
+        for (final topic in topics) {
+          final tTitle = topic['title'] ?? '';
+          final content = topic['content'] ?? '';
+          knowledge.writeln('- $tTitle: $content');
+        }
+        knowledge.writeln();
+      }
+
+      var knowledgeText = knowledge.toString();
+      const int maxKnowledgeLength = 2000;
+      if (knowledgeText.length > maxKnowledgeLength) {
+        knowledgeText = knowledgeText.substring(0, maxKnowledgeLength) + '\n...[truncated]';
+      }
+
+      final promptTemplate = '''You are a helpful tutor. Use the following lessons as context (do not invent facts).\n\nCONTEXT:\n${knowledgeText}\n\nINSTRUCTION: Answer concisely for students and provide step-by-step explanation if applicable.\n\nQUESTION:\n{input}''';
+
+      final question = 'Please explain the following topic in simple terms and give 1 short example: ${currentTopic['title']}';
+
+      final stream = _aiService.sendMessageWithTemplate(promptTemplate, question);
+      final buffer = StringBuffer();
+
+      await for (final token in stream) {
+        buffer.write(token);
+        setState(() {
+          _aiGeneratedContent = buffer.toString();
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) print('Error generating AI content: $e');
+      // Leave fallback content in place
+    } finally {
+      setState(() {
+        _isGenerating = false;
+      });
+    }
+  }
 
   void _nextTopic() {
     if (currentTopicIndex < currentTopics.length - 1) {
@@ -358,14 +459,46 @@ class _LearningScreenState extends State<LearningScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       child: Padding(
                         padding: const EdgeInsets.all(20),
-                        child: Text(
-                          currentTopic['content']!,
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            height: 1.6,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
+                        child: Builder(builder: (context) {
+                          // If model is initializing show status
+                          if (_isModelLoading) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(height: 8),
+                                const CircularProgressIndicator(),
+                                const SizedBox(height: 12),
+                                Text(_modelStatus),
+                                if (_modelProgress != null) ...[
+                                  const SizedBox(height: 8),
+                                  LinearProgressIndicator(value: _modelProgress),
+                                ]
+                              ],
+                            );
+                          }
+
+                          // If currently generating, show streaming content
+                          if (_isGenerating || _aiGeneratedContent.isNotEmpty) {
+                            return SelectableText(
+                              _aiGeneratedContent.isNotEmpty ? _aiGeneratedContent : 'Generating...',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                height: 1.6,
+                                color: colorScheme.onSurface,
+                              ),
+                            );
+                          }
+
+                          // Fallback: show the original lesson content
+                          return Text(
+                            currentTopic['content']!,
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              height: 1.6,
+                              color: colorScheme.onSurface,
+                            ),
+                          );
+                        }),
                       ),
                     ),
                   ),
