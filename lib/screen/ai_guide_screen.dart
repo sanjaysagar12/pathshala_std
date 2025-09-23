@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_gemma/core/chat.dart';
+import 'package:flutter_gemma/core/model.dart';
+import 'package:flutter_gemma/flutter_gemma.dart';
+import '../data/model_downloader_service.dart';
 
 class AIGuideScreen extends StatefulWidget {
   final String subjectName;
@@ -20,17 +25,118 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<Map<String, String>> _messages = [];
 
+  InferenceModel? _inferenceModel;
+  InferenceChat? _chat;
+  bool _isModelLoading = true;
+  String _loadingMessage = 'Initializing...';
+  double? _downloadProgress;
+  final ModelDownloaderService _modelDownloader = ModelDownloaderService();
+
   @override
   void initState() {
     super.initState();
-    // Add welcome message
-    _messages.add({
-      'sender': 'ai',
-      'message': 'Hello! I\'m your AI Guide for ${widget.subjectName}. I\'m here to help you understand concepts, answer questions, and provide personalized learning guidance. What would you like to explore today?',
-    });
+    _initializeModel();
   }
 
-  void _sendMessage() {
+  @override
+  void dispose() {
+    _cleanupModel();
+    super.dispose();
+  }
+
+  Future<void> _cleanupModel() async {
+    try {
+      // Clear the chat instance
+      _chat = null;
+      
+      // Close and clear the inference model
+      if (_inferenceModel != null) {
+        await _inferenceModel!.close();
+        _inferenceModel = null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error cleaning up model: $e');
+      }
+    }
+  }
+
+  Future<void> _initializeModel() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isModelLoading = true;
+      _loadingMessage = 'Initializing...';
+      _downloadProgress = null;
+    });
+
+    try {
+      // Clean up any existing model instance first
+      await _cleanupModel();
+
+      final gemma = FlutterGemmaPlugin.instance;
+      final isModelInstalled = await _modelDownloader.isModelInstalled();
+
+      if (!isModelInstalled) {
+        if (!mounted) return;
+        setState(() {
+          _loadingMessage = 'Downloading AI Model...';
+        });
+        
+        await _modelDownloader.downloadModel(
+          onProgress: (progress) {
+            if (!mounted) return;
+            setState(() {
+              _downloadProgress = progress;
+            });
+          },
+        );
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _loadingMessage = 'Initializing model...';
+        _downloadProgress = null;
+      });
+
+      // Install the model
+      final modelPath = await _modelDownloader.getModelFilePath();
+      await gemma.modelManager.installModelFromAsset(modelPath);
+
+      _inferenceModel = await gemma.createModel(
+        modelType: ModelType.gemmaIt,
+        supportImage: false,
+        maxTokens: 2048,
+      );
+
+      _chat = await _inferenceModel!.createChat(supportImage: false);
+
+      setState(() {
+        _isModelLoading = false;
+        // Add welcome message after model is ready
+        _messages.add({
+          'sender': 'ai',
+          'message': 'Hello! I\'m your AI Guide for ${widget.subjectName}. I\'m here to help you understand concepts, answer questions, and provide personalized learning guidance. What would you like to explore today?',
+        });
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error initializing model: $e");
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to initialize AI model: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      setState(() {
+        _isModelLoading = false;
+      });
+    }
+  }
+
+  Future<void> _sendMessage() async {
     if (_messageController.text.trim().isNotEmpty) {
       final userMessage = _messageController.text.trim();
       
@@ -42,55 +148,58 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
       });
 
       _messageController.clear();
-      
-      // Simulate AI response
-      Future.delayed(const Duration(milliseconds: 1000), () {
+      _scrollToBottom();
+
+      try {
+        // Add user message to chat
+        await _chat!.addQueryChunk(Message(text: userMessage, isUser: true));
+
+        // Add a placeholder for the AI's response
         setState(() {
           _messages.add({
             'sender': 'ai',
-            'message': _generateAIResponse(userMessage),
+            'message': 'Thinking...',
           });
         });
-        _scrollToBottom();
-      });
+
+        // Generate response using stream
+        final responseStream = _chat!.generateChatResponseAsync();
+        String fullResponse = '';
+
+        await for (final response in responseStream) {
+          if (!mounted) return;
+          
+          fullResponse += response.toString();
+          
+          setState(() {
+            _messages.last['message'] = fullResponse;
+          });
+          _scrollToBottom();
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error generating response: $e');
+        }
+        if (!mounted) return;
+        
+        // Update the message to show the error
+        setState(() {
+          _messages.last['message'] = 'Sorry, I encountered an error while generating a response. Please try again.';
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to generate response: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       
       _scrollToBottom();
     }
   }
 
-  String _generateAIResponse(String userMessage) {
-    String message = userMessage.toLowerCase();
-    
-    // Comprehensive AI responses based on different types of queries
-    if (message.contains('hello') || message.contains('hi') || message.contains('hey')) {
-      return 'Hello! Great to see you\'re ready to learn ${widget.subjectName}. I can help you with:\n\n✓ Explaining complex concepts\n✓ Providing step-by-step solutions\n✓ Creating study plans\n✓ Practice questions\n✓ Learning tips and strategies\n\nWhat specific topic would you like to explore?';
-    } 
-    else if (message.contains('explain') || message.contains('what is') || message.contains('define')) {
-      return 'I\'d love to explain that concept to you! In ${widget.subjectName}, this topic involves several key components:\n\n• Core principles and definitions\n• Real-world applications\n• Common examples and scenarios\n• How it connects to other concepts\n\nTo give you the most helpful explanation, could you tell me your current level of understanding? Are you a beginner or do you have some background knowledge?';
-    }
-    else if (message.contains('study plan') || message.contains('schedule') || message.contains('how to study')) {
-      return 'Great question! Here\'s a personalized study approach for ${widget.subjectName}:\n\n📚 **Daily Study Plan:**\n• 20-30 minutes of concept review\n• Practice problems or examples\n• Quick recap of previous topics\n\n🎯 **Weekly Goals:**\n• Master 2-3 new concepts\n• Complete practice exercises\n• Review and reinforce learning\n\n💡 **Study Tips:**\n• Break complex topics into smaller parts\n• Use real-world examples\n• Practice regularly\n• Ask questions when stuck\n\nWould you like me to create a specific plan for any particular topic?';
-    }
-    else if (message.contains('difficult') || message.contains('hard') || message.contains('struggling') || message.contains('confused')) {
-      return 'I understand that ${widget.subjectName} can be challenging sometimes! That\'s completely normal. Let\'s break this down:\n\n🔍 **Identify the Challenge:**\n• What specific part is confusing?\n• Where do you get stuck?\n• What feels overwhelming?\n\n💪 **My Approach:**\n• Simplify complex concepts\n• Use analogies and examples\n• Step-by-step explanations\n• Practice with easier problems first\n\n✨ Remember: Every expert was once a beginner! I\'m here to guide you through each step. What specific topic would you like help with?';
-    }
-    else if (message.contains('practice') || message.contains('exercise') || message.contains('problem') || message.contains('question')) {
-      return 'Excellent! Practice is key to mastering ${widget.subjectName}. Here\'s how I can help:\n\n📝 **Practice Options:**\n• Step-by-step problem solving\n• Guided practice sessions\n• Difficulty-appropriate exercises\n• Instant feedback and explanations\n\n🎯 **Practice Strategy:**\n1. Start with fundamentals\n2. Gradually increase complexity\n3. Focus on understanding, not just answers\n4. Learn from mistakes\n\nWhat type of problems would you like to practice? Basic concepts, intermediate applications, or advanced challenges?';
-    }
-    else if (message.contains('test') || message.contains('exam') || message.contains('quiz') || message.contains('assessment')) {
-      return 'I can definitely help you prepare for assessments in ${widget.subjectName}! Here\'s my exam preparation strategy:\n\n📖 **Study Preparation:**\n• Review key concepts and formulas\n• Practice different question types\n• Create summary notes\n• Identify weak areas for extra focus\n\n⏰ **Test-Taking Tips:**\n• Read questions carefully\n• Manage your time effectively\n• Show your work step-by-step\n• Review answers if time permits\n\n🎯 **Practice Tests:**\nI can create custom practice questions based on your syllabus. Would you like to start with specific topics or a comprehensive review?';
-    }
-    else if (message.contains('help') || message.contains('assist') || message.contains('support')) {
-      return 'I\'m here to provide comprehensive support for your ${widget.subjectName} journey! Here\'s how I can assist:\n\n🎓 **Learning Support:**\n• Concept explanations with examples\n• Problem-solving strategies\n• Study techniques and tips\n• Progress tracking and motivation\n\n🤔 **Question Types I Handle:**\n• "How do I solve...?"\n• "Why does this work?"\n• "Can you explain...?"\n• "What\'s the best way to...?"\n\n💬 **Interactive Learning:**\nFeel free to ask follow-up questions, request clarifications, or dive deeper into any topic. I adapt my responses to your learning style!\n\nWhat would you like to start with today?';
-    }
-    else if (message.contains('thank') || message.contains('thanks')) {
-      return 'You\'re very welcome! I\'m glad I could help with your ${widget.subjectName} studies. 😊\n\nRemember:\n• Keep practicing regularly\n• Don\'t hesitate to ask questions\n• Celebrate small victories\n• Stay curious and keep learning!\n\nI\'m always here whenever you need guidance or have more questions. What else would you like to explore?';
-    }
-    else {
-      // Default comprehensive response
-      return 'That\'s an interesting question about ${widget.subjectName}! Let me help you with that.\n\n🔍 **Understanding Your Question:**\nI want to make sure I give you the most helpful response. This topic connects to several important concepts in ${widget.subjectName}.\n\n💡 **Key Points to Consider:**\n• Fundamental principles involved\n• Practical applications\n• Common misconceptions to avoid\n• Best approaches to master this\n\n📚 **Next Steps:**\nCould you provide a bit more context? For example:\n• What specific aspect interests you most?\n• What\'s your current understanding level?\n• Are there particular examples you\'d like me to use?\n\nThis will help me tailor my explanation perfectly for you!';
-    }
-  }
+
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -105,14 +214,43 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
   }
 
   @override
-  void dispose() {
-    _messageController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    if (_isModelLoading) {
+      return Scaffold(
+        backgroundColor: Colors.grey[50],
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 24),
+              Text(
+                _loadingMessage,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              if (_downloadProgress != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32.0,
+                    vertical: 16.0,
+                  ),
+                  child: Column(
+                    children: [
+                      LinearProgressIndicator(value: _downloadProgress),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${(_downloadProgress! * 100).toStringAsFixed(1)}%',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+    
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(

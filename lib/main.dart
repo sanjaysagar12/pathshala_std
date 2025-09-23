@@ -9,7 +9,13 @@ import 'screen/test_screen.dart';
 import 'screen/quiz_screen.dart';
 import 'screen/ai_guide_screen.dart';
 
-void main() {
+
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter_gemma/flutter_gemma.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // await dotenv.load();
   runApp(const MyApp());
 }
 
