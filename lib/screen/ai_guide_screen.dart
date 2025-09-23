@@ -165,34 +165,65 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isModelLoading) {
+      // Use splash-screen theme while model initializes/downloads
       return Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: Colors.white,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 24),
+              // Logo like in SplashScreen
+              Image.asset(
+                'assets/images/logo.png',
+                width: MediaQuery.of(context).size.width * 0.6,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 32),
+
+              // Status text
               Text(
                 _loadingMessage,
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
               ),
-              if (_downloadProgress != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32.0,
-                    vertical: 16.0,
+              const SizedBox(height: 20),
+
+              // Animated progress bar similar to SplashScreen
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 80),
+                child: Container(
+                  width: double.infinity,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Column(
+                  child: Stack(
                     children: [
-                      LinearProgressIndicator(value: _downloadProgress),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${(_downloadProgress! * 100).toStringAsFixed(1)}%',
-                        style: Theme.of(context).textTheme.bodySmall,
+                      FractionallySizedBox(
+                        widthFactor: _downloadProgress ?? 0.15,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Colors.deepOrange, Colors.orange],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
                     ],
                   ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+              if (_downloadProgress != null)
+                Text(
+                  '${(_downloadProgress! * 100).toStringAsFixed(1)}%',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
             ],
           ),

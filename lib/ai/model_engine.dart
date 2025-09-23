@@ -5,7 +5,7 @@ import 'package:flutter_gemma/core/chat.dart';
 import 'package:flutter_gemma/core/model.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 
-import '../data/model_downloader_service.dart';
+import 'model_downloader_service.dart';
 
 /// A small service that encapsulates the LLM (flutter_gemma) lifecycle
 /// and exposes a simple API for the UI.
