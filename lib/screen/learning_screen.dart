@@ -86,29 +86,32 @@ class _LearningScreenState extends State<LearningScreen> {
         });
       }
 
-      // Build knowledge from lessons (similar to ai_guide_screen)
-      final lessonsMap = LessonsData.getSubjectLessons(widget.subjectName);
-      final lessonsList = lessonsMap['lessons'] as List<dynamic>? ?? [];
-      final StringBuffer knowledge = StringBuffer();
-      for (final lesson in lessonsList) {
-        final title = lesson['lessonTitle'] ?? '';
-        knowledge.writeln('Lesson: $title');
-        final topics = lesson['topics'] as List<dynamic>? ?? [];
-        for (final topic in topics) {
-          final tTitle = topic['title'] ?? '';
-          final content = topic['content'] ?? '';
-          knowledge.writeln('- $tTitle: $content');
-        }
-        knowledge.writeln();
-      }
+      // Use only the current topic as the authoritative context
+      final currentLesson = subjectLessons[currentLessonIndex];
+      final currentTopicMap = currentTopics[currentTopicIndex];
+      final topicTitle = currentTopicMap['title'] ?? '';
+      final topicContent = currentTopicMap['content'] ?? '';
 
-      var knowledgeText = knowledge.toString();
+      var knowledgeText = 'Lesson: ${currentLesson['lessonTitle']}\nTopic: $topicTitle\n\n$topicContent';
+
       const int maxKnowledgeLength = 2000;
       if (knowledgeText.length > maxKnowledgeLength) {
         knowledgeText = knowledgeText.substring(0, maxKnowledgeLength) + '\n...[truncated]';
       }
 
-      final promptTemplate = '''You are a helpful tutor. Use the following lessons as context (do not invent facts).\n\nCONTEXT:\n${knowledgeText}\n\nINSTRUCTION: Answer concisely for students and provide step-by-step explanation if applicable.\n\nQUESTION:\n{input}''';
+      final promptTemplate = '''You are a helpful tutor. Use the following topic as the authoritative context (do not invent facts beyond it).
+
+CONTEXT:
+${knowledgeText}
+
+INSTRUCTION:
+- Teach only the given topic. Do not introduce unrelated topics.
+- Answer in simple language suitable for students and provide a step-by-step explanation when relevant.
+- Give one short, concrete example.
+
+QUESTION:
+{input}
+''';
 
       final question = 'Please explain the following topic in simple terms and give 1 short example: ${currentTopic['title']}';
 
@@ -136,6 +139,8 @@ class _LearningScreenState extends State<LearningScreen> {
       setState(() {
         currentTopicIndex++;
       });
+      // Generate content for the new topic
+      _generateContentForCurrentTopic();
     } else if (currentLessonIndex < subjectLessons.length - 1) {
       // Navigate to test before going to next lesson
       Navigator.pushNamed(
@@ -152,6 +157,7 @@ class _LearningScreenState extends State<LearningScreen> {
           currentLessonIndex++;
           currentTopicIndex = 0;
         });
+        _generateContentForCurrentTopic();
       });
     } else {
       // Last topic of last lesson - go to final test
@@ -172,121 +178,125 @@ class _LearningScreenState extends State<LearningScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Select Lesson & Topic'),
-        content: SizedBox(
-          width: double.maxFinite,
-          height: 400,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Choose Lesson:',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: widget.subjectColor,
+        content: StatefulBuilder(
+          builder: (context, setState) => SizedBox(
+            width: double.maxFinite,
+            height: 400,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Choose Lesson:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: widget.subjectColor,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.maxFinite,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: widget.subjectColor.withOpacity(0.3)),
-                  borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 8),
+                Container(
+                  width: double.maxFinite,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: widget.subjectColor.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DropdownButton<int>(
+                    value: currentLessonIndex,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    icon: Icon(Icons.arrow_drop_down, color: widget.subjectColor),
+                    items: subjectLessons.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      String title = entry.value['lessonTitle'];
+                      return DropdownMenuItem<int>(
+                        value: index,
+                        child: Text(title),
+                      );
+                    }).toList(),
+                    onChanged: (int? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          currentLessonIndex = newValue;
+                          currentTopicIndex = 0; // Reset to first topic
+                        });
+                        _generateContentForCurrentTopic();
+                      }
+                    },
+                  ),
                 ),
-                child: DropdownButton<int>(
-                  value: currentLessonIndex,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  icon: Icon(Icons.arrow_drop_down, color: widget.subjectColor),
-                  items: subjectLessons.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    String title = entry.value['lessonTitle'];
-                    return DropdownMenuItem<int>(
-                      value: index,
-                      child: Text(title),
-                    );
-                  }).toList(),
-                  onChanged: (int? newValue) {
-                    if (newValue != null) {
-                      setState(() {
-                        currentLessonIndex = newValue;
-                        currentTopicIndex = 0; // Reset to first topic
-                      });
-                    }
-                  },
+                const SizedBox(height: 16),
+                Text(
+                  'Choose Topic:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: widget.subjectColor,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Choose Topic:',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: widget.subjectColor,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.maxFinite,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: widget.subjectColor.withOpacity(0.3)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: DropdownButton<int>(
-                  value: currentTopicIndex,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  icon: Icon(Icons.arrow_drop_down, color: widget.subjectColor),
-                  items: currentTopics.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    String title = entry.value['title']!;
-                    return DropdownMenuItem<int>(
-                      value: index,
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              color: widget.subjectColor.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${index + 1}',
-                                style: TextStyle(
-                                  color: widget.subjectColor,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 8),
+                Container(
+                  width: double.maxFinite,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: widget.subjectColor.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DropdownButton<int>(
+                    value: currentTopicIndex,
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    icon: Icon(Icons.arrow_drop_down, color: widget.subjectColor),
+                    items: currentTopics.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      String title = entry.value['title']!;
+                      return DropdownMenuItem<int>(
+                        value: index,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: widget.subjectColor.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${index + 1}',
+                                  style: TextStyle(
+                                    color: widget.subjectColor,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(child: Text(title)),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (int? newValue) {
-                    if (newValue != null) {
-                      setState(() {
-                        currentTopicIndex = newValue;
-                      });
-                    }
-                  },
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(title)),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (int? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          currentTopicIndex = newValue;
+                        });
+                        _generateContentForCurrentTopic();
+                      }
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Select a lesson and topic to jump to that content',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
+                const SizedBox(height: 16),
+                Text(
+                  'Select a lesson and topic to jump to that content',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         actions: [
