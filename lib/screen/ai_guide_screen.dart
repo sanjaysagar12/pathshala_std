@@ -164,15 +164,25 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
 
         // Generate response using stream
         final responseStream = _chat!.generateChatResponseAsync();
-        String fullResponse = '';
+        StringBuffer fullResponse = StringBuffer();
 
-        await for (final response in responseStream) {
+        await for (final token in responseStream) {
           if (!mounted) return;
           
-          fullResponse += response.toString();
-          
+          // Parse the TextResponse string to extract the actual text content
+          String tokenText = token.toString();
+          if (tokenText.startsWith('TextResponse("') && tokenText.endsWith('")')) {
+            tokenText = tokenText.substring(14, tokenText.length - 2);
+            tokenText = tokenText.replaceAll(r'\n', '\n').replaceAll(r'\"', '"').replaceAll(r'\\', '\\');
+          } else if (tokenText.startsWith('TextResponse(') && tokenText.endsWith(')')) {
+            tokenText = tokenText.substring(12, tokenText.length - 1);
+          }
+
+          // Always append, even if whitespace, to preserve newlines
+          fullResponse.write(tokenText);
+
           setState(() {
-            _messages.last['message'] = fullResponse;
+            _messages.last['message'] = fullResponse.toString();
           });
           _scrollToBottom();
         }
