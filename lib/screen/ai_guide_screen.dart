@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_gemma/core/chat.dart';
-import 'package:flutter_gemma/core/model.dart';
-import 'package:flutter_gemma/flutter_gemma.dart';
-import '../data/model_downloader_service.dart';
+import '../ai/model_engine.dart';
 
 class AIGuideScreen extends StatefulWidget {
   final String subjectName;
@@ -25,12 +22,10 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<Map<String, String>> _messages = [];
 
-  InferenceModel? _inferenceModel;
-  InferenceChat? _chat;
+  final AIModelService _aiService = AIModelService();
   bool _isModelLoading = true;
   String _loadingMessage = 'Initializing...';
   double? _downloadProgress;
-  final ModelDownloaderService _modelDownloader = ModelDownloaderService();
 
   @override
   void initState() {
@@ -45,20 +40,7 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
   }
 
   Future<void> _cleanupModel() async {
-    try {
-      // Clear the chat instance
-      _chat = null;
-      
-      // Close and clear the inference model
-      if (_inferenceModel != null) {
-        await _inferenceModel!.close();
-        _inferenceModel = null;
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error cleaning up model: $e');
-      }
-    }
+    await _aiService.cleanup();
   }
 
   Future<void> _initializeModel() async {
@@ -71,49 +53,22 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
     });
 
     try {
-      // Clean up any existing model instance first
-      await _cleanupModel();
-
-      final gemma = FlutterGemmaPlugin.instance;
-      final isModelInstalled = await _modelDownloader.isModelInstalled();
-
-      if (!isModelInstalled) {
-        if (!mounted) return;
-        setState(() {
-          _loadingMessage = 'Downloading AI Model...';
-        });
-        
-        await _modelDownloader.downloadModel(
-          onProgress: (progress) {
-            if (!mounted) return;
-            setState(() {
-              _downloadProgress = progress;
-            });
-          },
-        );
-      }
+      // Delegate initialization to the AI service. It will call back
+      // with progress and status updates which we reflect in the UI.
+      await _aiService.initialize(
+        onProgress: (progress) {
+          if (!mounted) return;
+          setState(() => _downloadProgress = progress);
+        },
+        onStatus: (status) {
+          if (!mounted) return;
+          setState(() => _loadingMessage = status);
+        },
+      );
 
       if (!mounted) return;
       setState(() {
-        _loadingMessage = 'Initializing model...';
-        _downloadProgress = null;
-      });
-
-      // Install the model
-      final modelPath = await _modelDownloader.getModelFilePath();
-      await gemma.modelManager.installModelFromAsset(modelPath);
-
-      _inferenceModel = await gemma.createModel(
-        modelType: ModelType.gemmaIt,
-        supportImage: false,
-        maxTokens: 2048,
-      );
-
-      _chat = await _inferenceModel!.createChat(supportImage: false);
-
-      setState(() {
         _isModelLoading = false;
-        // Add welcome message after model is ready
         _messages.add({
           'sender': 'ai',
           'message': 'Hello! I\'m your AI Guide for ${widget.subjectName}. I\'m here to help you understand concepts, answer questions, and provide personalized learning guidance. What would you like to explore today?',
@@ -151,10 +106,7 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
       _scrollToBottom();
 
       try {
-        // Add user message to chat
-        await _chat!.addQueryChunk(Message(text: userMessage, isUser: true));
-
-        // Add a placeholder for the AI's response
+        // Ask the service to send the message and stream tokens back.
         setState(() {
           _messages.add({
             'sender': 'ai',
@@ -162,27 +114,14 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
           });
         });
 
-        // Generate response using stream
-        final responseStream = _chat!.generateChatResponseAsync();
-        StringBuffer fullResponse = StringBuffer();
+        final responseStream = _aiService.sendMessage(userMessage);
+        final buffer = StringBuffer();
 
-        await for (final token in responseStream) {
+        await for (final tokenText in responseStream) {
           if (!mounted) return;
-          
-          // Parse the TextResponse string to extract the actual text content
-          String tokenText = token.toString();
-          if (tokenText.startsWith('TextResponse("') && tokenText.endsWith('")')) {
-            tokenText = tokenText.substring(14, tokenText.length - 2);
-            tokenText = tokenText.replaceAll(r'\n', '\n').replaceAll(r'\"', '"').replaceAll(r'\\', '\\');
-          } else if (tokenText.startsWith('TextResponse(') && tokenText.endsWith(')')) {
-            tokenText = tokenText.substring(12, tokenText.length - 1);
-          }
-
-          // Always append, even if whitespace, to preserve newlines
-          fullResponse.write(tokenText);
-
+          buffer.write(tokenText);
           setState(() {
-            _messages.last['message'] = fullResponse.toString();
+            _messages.last['message'] = buffer.toString();
           });
           _scrollToBottom();
         }
@@ -265,7 +204,7 @@ class _AIGuideScreenState extends State<AIGuideScreen> {
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text(
-          'AI Assistant',
+          'AI Guide - ${widget.subjectName}',
           style: GoogleFonts.inter(
             fontWeight: FontWeight.w600,
             fontSize: 18,
