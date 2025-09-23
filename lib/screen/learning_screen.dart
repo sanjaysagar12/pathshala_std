@@ -30,7 +30,6 @@ class _LearningScreenState extends State<LearningScreen> {
   double? _modelProgress;
   bool _isGenerating = false;
   String _aiGeneratedContent = '';
-  String? _lastGeneratedTopicKey;
 
   List<Map<String, dynamic>> get subjectLessons {
     return LessonsData.getSubjectLessons(widget.subjectName)['lessons']!;
@@ -48,14 +47,10 @@ class _LearningScreenState extends State<LearningScreen> {
 
   Future<void> _generateContentForCurrentTopic() async {
     final currentTopic = currentTopics[currentTopicIndex];
-    final topicKey = '${currentLessonIndex}_$currentTopicIndex';
-    // Avoid regenerating if already generated for this topic
-    if (_lastGeneratedTopicKey == topicKey && _aiGeneratedContent.isNotEmpty) return;
 
     setState(() {
       _isGenerating = true;
       _aiGeneratedContent = '';
-      _lastGeneratedTopicKey = topicKey;
     });
 
     try {
@@ -86,20 +81,19 @@ class _LearningScreenState extends State<LearningScreen> {
         });
       }
 
-      // Use only the current topic as the authoritative context
+      // Use only the current topic title as context
       final currentLesson = subjectLessons[currentLessonIndex];
       final currentTopicMap = currentTopics[currentTopicIndex];
       final topicTitle = currentTopicMap['title'] ?? '';
-      final topicContent = currentTopicMap['content'] ?? '';
 
-      var knowledgeText = 'Lesson: ${currentLesson['lessonTitle']}\nTopic: $topicTitle\n\n$topicContent';
+      var knowledgeText = 'Lesson: ${currentLesson['lessonTitle']}\nTopic: $topicTitle';
 
       const int maxKnowledgeLength = 2000;
       if (knowledgeText.length > maxKnowledgeLength) {
         knowledgeText = knowledgeText.substring(0, maxKnowledgeLength) + '\n...[truncated]';
       }
 
-      final promptTemplate = '''You are a helpful tutor. Use the following topic as the authoritative context (do not invent facts beyond it).
+      final promptTemplate = '''You are a helpful tutor. Generate educational content for the given topic.
 
 CONTEXT:
 ${knowledgeText}
